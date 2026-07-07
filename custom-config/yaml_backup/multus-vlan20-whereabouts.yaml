@@ -1,0 +1,24 @@
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: vlan20-network
+  namespace: default
+spec:
+  config: '{
+      "cniVersion": "0.3.1",
+      "name": "ext200-vlan",
+      "type": "vlan",
+      "master": "enp0s9",
+      "vlanId": 20,
+      "ipam": {
+        "type": "whereabouts",
+        "range": "192.168.200.0/24",
+        "range_start": "192.168.200.111",
+        "range_end": "192.168.200.119",
+        "gateway": "192.168.200.1",
+        "exclude": [
+          "192.168.200.1/32",
+          "192.168.200.200/32"
+        ]
+      }
+    }'

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wait-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn-wait # 방금 만든 클래스 사용
+  resources:
+    requests:
+      storage: 1Gi

@@ -1,0 +1,9 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: longhorn-wait
+provisioner: driver.longhorn.io
+allowVolumeExpansion: true
+reclaimPolicy: Delete
+# 핵심 설정: 파드가 생성될 때까지 PV 생성을 미룸
+volumeBindingMode: WaitForFirstConsumer

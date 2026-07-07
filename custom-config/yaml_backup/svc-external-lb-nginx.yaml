@@ -1,0 +1,13 @@
+# kubectl expose 명령어 실행 시 백그라운드에서 자동으로 생성해 준 장부
+# kubectl expose deployment nginx-lb-test --port=80 --type=LoadBalancer
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-external-lb  # --name 으로 준 이름
+spec:
+  type: LoadBalancer        # --type 으로 준 타입
+  ports:
+  - port: 80                # --port 로 준 겉 포트
+    targetPort: 80          # 파드 내부의 실제 포트
+  selector:
+    app: nginx-test         # 대상 Deployment가 가지고 있던 파드 식별 라벨 (자동 매칭)

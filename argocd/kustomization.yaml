@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# 1. 자원들이 배포될 네임스페이스 지정
+namespace: argocd
+
+# 2. 가져올 원본 베이스 도면 주소 (로컬 파일 주소나 원격 주소 모두 가능)
+resources:
+  - https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+# 3. [핵심] 지난번에 수동으로 쳤던 NodePort 수정을 YAML 코드로 박아두기
+patches:
+  - patch: |-
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: argocd-server
+      spec:
+        type: NodePort
+    target:
+      kind: Service
+      name: argocd-server

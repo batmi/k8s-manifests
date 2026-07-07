@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  namespace: default
+spec:
+  replicas: 2
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: nginx-test
+  template:
+    metadata:
+      labels:
+        app: nginx-test
+        role: web
+      annotations:
+        k8s.v1.cni.cncf.io/networks: vlan20-network
+    spec:
+      containers:
+      - name: nginx
+        image: nginx

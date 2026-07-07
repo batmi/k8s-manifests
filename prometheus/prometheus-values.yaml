@@ -1,0 +1,9 @@
+# prometheus-values.yaml
+grafana:
+  persistence:
+    enabled: false  # 그라파나 스토리지 비활성화
+
+prometheus:
+  prometheusSpec:
+    # storageSpec을 비워두면 자동으로 emptyDir(임시볼륨)을 사용하여 안 멈추고 뜹니다.
+    storageSpec: {}

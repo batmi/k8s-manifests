@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: net-debug
+  namespace: web-service
+  annotations:
+    # Multus 네트워크 적용 (web-service 네임스페이스의 external-net NAD 사용)
+    k8s.v1.cni.cncf.io/networks: external-net
+spec:
+  containers:
+  - name: net-debug
+    image: nicolaka/netshoot:latest
+    command: ["/bin/bash", "-c", "sleep 3600"]
+    securityContext:
+      capabilities:
+        add: ["NET_ADMIN", "NET_RAW"] # 네트워크 디버깅을 위해 권한 부여

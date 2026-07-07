@@ -1,0 +1,19 @@
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: external-net-pool
+  namespace: metallb-system
+spec:
+  addresses:
+  - 192.168.200.200-192.168.200.200
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: external-net-adv
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+  - external-net-pool
+  interfaces:
+  - enp0s9  # 오직 이 인터페이스로만 외부 VIP 광고

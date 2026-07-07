@@ -1,0 +1,102 @@
+apiVersion: operator.tigera.io/v1
+kind: Installation
+metadata:
+  creationTimestamp: "2026-07-06T11:38:10Z"
+  finalizers:
+  - tigera.io/operator-cleanup
+  generation: 3
+  name: default
+  resourceVersion: "15737"
+  uid: c819ba00-b055-455c-bea3-9ab607b8bd35
+spec:
+  calicoNetwork:
+    bgp: Enabled
+    hostPorts: Enabled
+    ipPools:
+    - blockSize: 26
+      cidr: 192.168.0.0/16
+      disableBGPExport: false
+      encapsulation: VXLANCrossSubnet
+      natOutgoing: Enabled
+      nodeSelector: all()
+    linuxDataplane: Iptables
+    multiInterfaceMode: None
+    nodeAddressAutodetectionV4:
+      interface: enp0s8
+  cni:
+    ipam:
+      type: Calico
+    type: Calico
+  controlPlaneReplicas: 2
+  flexVolumePath: /usr/libexec/kubernetes/kubelet-plugins/volume/exec/
+  kubeletVolumePluginPath: /var/lib/kubelet
+  logging:
+    cni:
+      logFileMaxAgeDays: 30
+      logFileMaxCount: 10
+      logFileMaxSize: 100Mi
+      logSeverity: Info
+  nodeUpdateStrategy:
+    rollingUpdate:
+      maxUnavailable: 1
+    type: RollingUpdate
+  nonPrivileged: Disabled
+  variant: Calico
+status:
+  calicoVersion: v3.26.1
+  computed:
+    calicoNetwork:
+      bgp: Enabled
+      hostPorts: Enabled
+      ipPools:
+      - blockSize: 26
+        cidr: 192.168.0.0/16
+        disableBGPExport: false
+        encapsulation: VXLANCrossSubnet
+        natOutgoing: Enabled
+        nodeSelector: all()
+      linuxDataplane: Iptables
+      multiInterfaceMode: None
+      nodeAddressAutodetectionV4:
+        interface: enp0s8
+    cni:
+      ipam:
+        type: Calico
+      type: Calico
+    controlPlaneReplicas: 2
+    flexVolumePath: /usr/libexec/kubernetes/kubelet-plugins/volume/exec/
+    kubeletVolumePluginPath: /var/lib/kubelet
+    logging:
+      cni:
+        logFileMaxAgeDays: 30
+        logFileMaxCount: 10
+        logFileMaxSize: 100Mi
+        logSeverity: Info
+    nodeUpdateStrategy:
+      rollingUpdate:
+        maxUnavailable: 1
+      type: RollingUpdate
+    nonPrivileged: Disabled
+    variant: Calico
+  conditions:
+  - lastTransitionTime: "2026-07-06T12:36:30Z"
+    message: DaemonSet "calico-system/calico-node" update is rolling out (1 out of
+      3 updated)
+    observedGeneration: 3
+    reason: ResourceNotReady
+    status: "True"
+    type: Progressing
+  - lastTransitionTime: "2026-07-06T12:36:30Z"
+    message: ""
+    observedGeneration: 3
+    reason: Unknown
+    status: "False"
+    type: Degraded
+  - lastTransitionTime: "2026-07-06T12:36:30Z"
+    message: ""
+    observedGeneration: 3
+    reason: Unknown
+    status: "False"
+    type: Ready
+  mtu: 1450
+  variant: Calico

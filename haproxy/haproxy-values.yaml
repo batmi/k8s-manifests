@@ -1,0 +1,30 @@
+controller:
+  replicaCount: 2
+
+  # 중요: 명시적 IngressClass 자원을 수동 관리할 때는 이 값을 비워두어야 
+  # 헬름이 레거시 인자(--ingress.class)를 주입하지 않아 충돌이 안 납니다.
+  ingressClass: ""
+  ingressClassResource:
+    enabled: false # ingressClass 자동 생성은 차단
+
+  # ★ 중요 2: 인그레스 자원의 ADDRESS 칸에 MetalLB IP를 자동으로 적어주도록 활성화
+  publishService:
+    enabled: true
+
+  service:
+    type: LoadBalancer
+    annotations:
+      metallb.universe.tf/loadBalancerIPs: "192.168.200.200"
+
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+              - kubernetes-ingress
+          topologyKey: "kubernetes.io/hostname"

@@ -1,0 +1,49 @@
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: haproxy  # 내가 직접 관리하는 클래스 이름
+spec:
+  controller: haproxy.org/ingress-controller  # ★ 기업용 haproxytech 전용 식별자
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-internal-svc
+  namespace: web-service
+spec:
+  selector:
+    app: nginx   # nginx-deployment에서 파드 라벨과 동일하게 'nginx'로 교정
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-ingress-l7
+  namespace: web-service
+  # annotations 영역 자체를 삭제하거나 지워서 깨끗하게 유지합니다.
+spec:
+  ingressClassName: haproxy  # 위의 명시적 클래스를 정확히 조준
+  rules:
+  - host: nginx.batmi.org  # 1. 도메인 접속 허용
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-internal-svc
+            port:
+              number: 80
+  - http:                  # 2. host 필드 생략! (IP 주소 접속 등 나머지 모든 트래픽을 잡아내는 Catch-all 역할)
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-internal-svc
+            port:
+              number: 80

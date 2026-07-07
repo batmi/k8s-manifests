@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-w1-deployment
+  namespace: default
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: nginx-w1
+  template:
+    metadata:
+      labels:
+        app: nginx-w1
+        role: web
+      annotations:
+        k8s.v1.cni.cncf.io/networks: vlan20-worker1-nad
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: worker1
+      containers:
+      - name: nginx
+        image: nginx
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-w2-deployment
+  namespace: default
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: nginx-w2
+  template:
+    metadata:
+      labels:
+        app: nginx-w2
+        role: web
+      annotations:
+        k8s.v1.cni.cncf.io/networks: vlan20-worker2-nad
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: worker2
+      containers:
+      - name: nginx
+        image: nginx

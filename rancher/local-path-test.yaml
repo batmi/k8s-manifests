@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: test-local-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path # 우리가 만든 스토리지 클래스 지정
+  resources:
+    requests:
+      storage: 1Gi # 테스트용이므로 1기가만 요청
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-local-pod
+spec:
+  containers:
+    - name: app
+      image: alpine:latest
+      # 볼륨에 텍스트 파일을 하나 쓰고 무한 대기하는 단순한 명령입니다.
+      command: ["/bin/sh", "-c", "echo 'Rancher Local Path Works Perfectly!' > /mnt/storage-test.txt && sleep infinity"]
+      volumeMounts:
+        - name: my-volume
+          mountPath: /mnt
+  volumes:
+    - name: my-volume
+      persistentVolumeClaim:
+        claimName: test-local-pvc

@@ -1,0 +1,501 @@
+---
+# Source: kubernetes-ingress/templates/controller-serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: my-haproxy-kubernetes-ingress
+  namespace: haproxy-ingress
+  labels:
+    app.kubernetes.io/name: kubernetes-ingress
+    app.kubernetes.io/instance: my-haproxy
+    helm.sh/chart: kubernetes-ingress-1.52.1
+    app.kubernetes.io/version: "3.2.12"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: kubernetes-ingress/templates/controller-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-haproxy-kubernetes-ingress
+  namespace: haproxy-ingress
+  labels:
+    app.kubernetes.io/name: kubernetes-ingress
+    app.kubernetes.io/instance: my-haproxy
+    helm.sh/chart: kubernetes-ingress-1.52.1
+    app.kubernetes.io/version: "3.2.12"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: kubernetes-ingress/templates/clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: my-haproxy-kubernetes-ingress
+  labels:
+    app.kubernetes.io/name: kubernetes-ingress
+    app.kubernetes.io/instance: my-haproxy
+    helm.sh/chart: kubernetes-ingress-1.52.1
+    app.kubernetes.io/version: "3.2.12"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - endpoints
+  - nodes
+  - pods
+  - services
+  - namespaces
+  - events
+  - serviceaccounts
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - "extensions"
+  - "networking.k8s.io"
+  resources:
+  - ingresses
+  - ingresses/status
+  - ingressclasses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - "extensions"
+  - "networking.k8s.io"
+  resources:
+  - ingresses/status
+  verbs:
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - patch
+  - update
+- apiGroups:
+  - discovery.k8s.io
+  resources:
+  - endpointslices
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - core.haproxy.org
+  resources:
+    - "*"
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+- apiGroups:
+  - ingress.v1.haproxy.org
+  - ingress.v1.haproxy.com
+  - ingress.v3.haproxy.org
+  - ingress.v3.haproxy.com
+  resources:
+    - "*"
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+- apiGroups:
+  - "apiextensions.k8s.io"
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - "apps"
+  resources:
+  - replicasets
+  - deployments
+  - daemonsets
+  verbs:
+  - get
+  - list
+  - watch
+---
+# Source: kubernetes-ingress/templates/clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: my-haproxy-kubernetes-ingress
+  labels:
+    app.kubernetes.io/name: kubernetes-ingress
+    app.kubernetes.io/instance: my-haproxy
+    helm.sh/chart: kubernetes-ingress-1.52.1
+    app.kubernetes.io/version: "3.2.12"
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: my-haproxy-kubernetes-ingress
+subjects:
+- kind: ServiceAccount
+  name: my-haproxy-kubernetes-ingress
+  namespace: haproxy-ingress
+---
+# Source: kubernetes-ingress/templates/controller-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-haproxy-kubernetes-ingress
+  namespace: haproxy-ingress
+  labels:
+    app.kubernetes.io/name: kubernetes-ingress
+    app.kubernetes.io/instance: my-haproxy
+    helm.sh/chart: kubernetes-ingress-1.52.1
+    app.kubernetes.io/version: "3.2.12"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: LoadBalancer
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      appProtocol: http
+      targetPort: http
+    - name: https
+      port: 443
+      protocol: TCP
+      appProtocol: https
+      targetPort: https
+    - name: quic
+      port: 443
+      protocol: UDP
+      appProtocol: https
+      targetPort: quic
+    - name: stat
+      port: 1024
+      protocol: TCP
+      targetPort: stat
+    - name: admin
+      port: 6060
+      protocol: TCP
+      targetPort: admin
+  selector:
+    app.kubernetes.io/name: kubernetes-ingress
+    app.kubernetes.io/instance: my-haproxy
+  externalIPs:
+---
+# Source: kubernetes-ingress/templates/controller-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-haproxy-kubernetes-ingress
+  namespace: haproxy-ingress
+  labels:
+    app.kubernetes.io/name: kubernetes-ingress
+    app.kubernetes.io/instance: my-haproxy
+    helm.sh/chart: kubernetes-ingress-1.52.1
+    app.kubernetes.io/version: "3.2.12"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 2
+  minReadySeconds: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kubernetes-ingress
+      app.kubernetes.io/instance: my-haproxy
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kubernetes-ingress
+        app.kubernetes.io/instance: my-haproxy
+    spec:
+      enableServiceLinks: true
+      serviceAccountName: my-haproxy-kubernetes-ingress
+      terminationGracePeriodSeconds: 60
+      dnsPolicy: ClusterFirst
+      securityContext:
+        runAsNonRoot: true
+        runAsUser:  1000
+        runAsGroup: 1000
+      
+        
+      containers:
+        - name: kubernetes-ingress-controller
+          image: "docker.io/haproxytech/kubernetes-ingress:3.2.12"
+          imagePullPolicy: IfNotPresent
+          args:
+          - --default-ssl-certificate=haproxy-ingress/my-haproxy-kubernetes-ingress-default-cert
+          - --configmap=haproxy-ingress/my-haproxy-kubernetes-ingress
+          - --http-bind-port=8080
+          - --https-bind-port=8443
+          - --quic-bind-port=8443
+          - --quic-announce-port=443
+          - --ingress.class=haproxy
+          - --publish-service=haproxy-ingress/my-haproxy-kubernetes-ingress
+          - --log=info
+          - --prometheus
+          - --pprof
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - NET_BIND_SERVICE
+            seccompProfile:
+              type: RuntimeDefault
+          ports:
+            - name: admin
+              containerPort: 6060
+              protocol: TCP
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: https
+              containerPort: 8443
+              protocol: TCP
+            - name: stat
+              containerPort: 1024
+              protocol: TCP
+            - name: quic
+              containerPort: 8443
+              protocol: UDP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 1042
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 1042
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          startupProbe:
+            failureThreshold: 30
+            httpGet:
+              path: /healthz
+              port: 1042
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          resources:
+            requests:
+              cpu: 250m
+              memory: 400Mi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+              subPath: tmp
+            - name: tmp
+              mountPath: /run
+              subPath: run
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 64Mi
+---
+# Source: kubernetes-ingress/templates/controller-ingressclass.yaml
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: haproxy
+  labels:
+    app.kubernetes.io/name: kubernetes-ingress
+    app.kubernetes.io/instance: my-haproxy
+    helm.sh/chart: kubernetes-ingress-1.52.1
+    app.kubernetes.io/version: "3.2.12"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  controller: haproxy.org/ingress-controller/haproxy
+---
+# Source: kubernetes-ingress/templates/controller-crdjob-rbac.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: my-haproxy-kubernetes-ingress-crdjob
+  namespace: haproxy-ingress
+  labels:
+    app.kubernetes.io/name: my-haproxy-kubernetes-ingress-proxy
+    app.kubernetes.io/instance: my-haproxy
+    helm.sh/chart: kubernetes-ingress-1.52.1
+    app.kubernetes.io/version: "3.2.12"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    helm.sh/hook: post-install,pre-upgrade
+    helm.sh/hook-weight: "-5"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+---
+# Source: kubernetes-ingress/templates/controller-defaultcertsecret.yaml
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/tls
+metadata:
+  name: my-haproxy-kubernetes-ingress-default-cert
+  namespace: haproxy-ingress
+  labels:
+    app.kubernetes.io/name: kubernetes-ingress
+    app.kubernetes.io/instance: my-haproxy
+    helm.sh/chart: kubernetes-ingress-1.52.1
+    app.kubernetes.io/version: "3.2.12"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    "helm.sh/hook": "pre-install"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+data:
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURMekNDQWhlZ0F3SUJBZ0lRRHNNRVErRVczKzVYdGZCSzlteTVTVEFOQmdrcWhraUc5dzBCQVFzRkFEQWcKTVI0d0hBWURWUVFERXhWcmRXSmxjbTVsZEdWekxXbHVaM0psYzNNdFkyRXdIaGNOTWpZd056QTBNVEl4TURRMApXaGNOTWpjd056QTBNVEl4TURRMFdqQWxNU013SVFZRFZRUURFeHB0ZVMxb1lYQnliM2g1TG1oaGNISnZlSGt0CmFXNW5jbVZ6Y3pDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBTGRJM3RyOEpOWnMKNEJxeG9Ia0FXQkxVb1dRenFkQ0NBQmRXc3dZd01VREFKT3hKYzZaY0tIdjJEMzdlWG0wd2dTUzdlUHJBMVRHUgo4MWU5Mm9sTDNIc1lvcjhzdUU1VmVqbHFSbmJVb1VqekxjQitSaitpMldudEJ3SzQ2MHZSMmZWV3pjdWYxYU92CldRd3JOcnJBditSdkp5UzJacHhZdStzRkVibUx5MzAycVp3d3JsRHU3UHp0QWQxQlpLeWZCeHlOVmZQM3V5U0wKY1A5aFBveTMyUlFQZUZDcS9PRERjTVVJbVgwYStIZHhGNXQrUmtMaEovYWxvdVZKd2hmYmZGM3lqdWd1NTRiZQo5ckc2clBFNXlIUVA2bU5tTmR3Y1RmYnd1cFZHRUdrUHBsajB0bnNSc2theGNFeHVJbmQ1L3lyNzQ0ODgyNEtXCmNBUGphRnhQTjBNQ0F3RUFBYU5nTUY0d0RnWURWUjBQQVFIL0JBUURBZ1dnTUIwR0ExVWRKUVFXTUJRR0NDc0cKQVFVRkJ3TUJCZ2dyQmdFRkJRY0RBakFNQmdOVkhSTUJBZjhFQWpBQU1COEdBMVVkSXdRWU1CYUFGTUlud2FKdgpxZHJXY1BvTmo0Yzg3NUhkamR6YU1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQkFRQVpzdFIzdWwrbTZNT3dud2d6CldYcVVvYXB3Ukp1VlcrYkFtOEdwL1Avckl1QVFZOGdBemJzdHlWczJFWlkvd00wTzV4Nzh5KzBhc1pXeTBiL2cKTld1SnE5WTdqY3N2N2s5Q1FIYjhodTA0TlVjSlplUUszMFRIa0xwWEMwSFJ2WTB3eEozWHZDNkdTa1RXTkxzUwpoTlhWNnc2alhwNitPazc2RC9SdHZ4MjN3djAxanV5eEh6bEloRUVQclJhV282QkxRR0MyWmllcjRpdjY5bUlsCmhhOFdyRlROVXNqQlBYNWlHdTB4YVZYcEYyKzJQZmZ6b245TU9ETE84VWlkbktWT1cyTEZNUVRVQXZYbWlVcG8KeXpjN2wxMW83eGtTeGJ6cGU1ODJwT1BGaEMxWEtoSnczSERyL01mUDlBM2hjT2NvZGE1QzlXZWVlZVRkQUp2TgpCSm93Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+  tls.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb3dJQkFBS0NBUUVBdDBqZTJ2d2sxbXpnR3JHZ2VRQllFdFNoWkRPcDBJSUFGMWF6QmpBeFFNQWs3RWx6CnBsd29lL1lQZnQ1ZWJUQ0JKTHQ0K3NEVk1aSHpWNzNhaVV2Y2V4aWl2eXk0VGxWNk9XcEdkdFNoU1BNdHdINUcKUDZMWmFlMEhBcmpyUzlIWjlWYk55NS9WbzY5WkRDczJ1c0MvNUc4bkpMWm1uRmk3NndVUnVZdkxmVGFwbkRDdQpVTzdzL08wQjNVRmtySjhISEkxVjgvZTdKSXR3LzJFK2pMZlpGQTk0VUtyODRNTnd4UWlaZlJyNGQzRVhtMzVHClF1RW45cVdpNVVuQ0Y5dDhYZktPNkM3bmh0NzJzYnFzOFRuSWRBL3FZMlkxM0J4Tjl2QzZsVVlRYVErbVdQUzIKZXhHeVJyRndURzRpZDNuL0t2dmpqenpiZ3Bad0ErTm9YRTgzUXdJREFRQUJBb0lCQUVHOVd1Vzd5N0MzVTNodgpucW5YOUQ4bzBneUJOVmNLMGVLTkgrQkgxOXFzTUhJcDlGZkd0V1NsQUxEV0xKTkljd0hNVmx2R1g1R01rblkxCnJCVlR4dXpHRE5XNlFnOGl2SmlzWkVMS0NHR0VpN1AvOXMxcmFVVURsZUNsbUF2VlpMS0paSDQxUWFrWXd6MUkKb0xSQ1gzR2RackpWMUI4ZStxUVU2T01lMzZsMG5rV1NhUzQ0T2RxMkp6RXhUcVc0bko4cFlVYi9QNGlBejdWVQp2LzFhUHBMM2ZlWFBXcDE3WHRid2xWekkzak9hajVtNDNpTGpyNEtmb0lNRnA4VDV3MXkrVDl3TnVUVy92ckVDCmlzNnZNVkg4aStDWnQya3RvRld2V2F1R29LSFBQdXpTK2RDTit2SVMrR2dMQ0ZaVkZiM2lXMGkram5JU09mVFEKVjF5RGVKa0NnWUVBN04rd0MvNE9CSlNYNVU4SXVEa1JocXBkNmpXODhHMXdQWUJYa0dBNWFWOUNLVWluV2dJcQovQUFxc3ZVak04cWVHejc4WkY3WWk1QjRlQmNsZFQraGgvdDh1RHBDVm1VWHNTelM0NTNhM2IzSmFsVkZSd2xMCmg0RHRzNnJySXcrdTRVTkt2YUxxOVcza0wybmMwUFdGeWp2amZoSjc1a1pCRnAwOWhxYTdFN3NDZ1lFQXhoVjMKUVNnR2FLbFQyQVhNMjcrOE1tbHdxQUNNTnhMME1FOG0rOFlRc1VtRWxwTG5vRnNHdXh1cENpZmQzQkxvNnRCQwpMSVFOSFlQSDhzM2JXS1lNTFlBVXN0OWZPY3pzdkdNb2lIYldCWnE2bzV5RnRCdWltVk94aWlZSnRBc2YrVUZiCnJ2VHFaMXJrRmZodnlEWVVkc1NjSjVLNHliWEJuaXk1R2dnWlBoa0NnWUJjYkM4Qmp1QWpVMk1zK3JoNVFQTWcKcXlxM3JyNEl4WHFzMUgzVi9HV0tRcnZLNWVrK1NtaEJLVU4vemZ3dFFocU1vUGZUcGRveUltMk8xZUVzcldZMgphNTdQTnhRWko1cWw2OHBoTzM5aFU2TGFGV2xSZlVQMkhBMGpORVpJeU43QVVBUkNsK1c3VzJSVVI2Yjc5VUI5Cmx2NTllM0xTZDRqLzdOeEx4SlJyN3dLQmdRQ0xOa3pndXV0K0pQcnJDSENJUkVGVXdLdlBOc3RVYlhxMmRQcDEKMmlhaklvTVBlK0ZUM29WbGZMUVpraGtuY1JiRzZHU0plcWpwQkZQQy9oQlpSaUdxM0tndmFqTTNvU0VENlVCMApYK2hjZWZrUHdaSnFHVDMyT2s2OVE2eHdINTF5QlJBVmJzVktyQ00rbWFLZDkvdjcySVBTZ0Joa2t0dW5lZEVCClRZM0lDUUtCZ0RsSy9Oczl0ZDdXRnZhdjZqVy9YZDZLbEZDQ3pLQ2d1N3Z5QXRGNUJ4R2dQWWxnSi9LRG9tQXoKSDJyTFZ1d2haVXZnemM3VGF4T1RQZlVMcjZmMFdRbXM3cmtBTFFxNWpSZ2JkWHpZaC9aNHNRNXVKQWxBSzMzeQpQODhXbm5RRGJkWERwaHd2dmtsa2JRTC90WjJxaGlwb3dLU3V5Y1VnSWxuamZWalFVRzYxCi0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg==
+---
+# Source: kubernetes-ingress/templates/controller-crdjob-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: my-haproxy-kubernetes-ingress-crdjob
+  labels:
+    app.kubernetes.io/name: my-haproxy-kubernetes-ingress-proxy
+    app.kubernetes.io/instance: my-haproxy
+    helm.sh/chart: kubernetes-ingress-1.52.1
+    app.kubernetes.io/version: "3.2.12"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    helm.sh/hook: post-install,pre-upgrade
+    helm.sh/hook-weight: "-5"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+rules:
+  - apiGroups:
+      - "apiextensions.k8s.io"
+    resources:
+      - customresourcedefinitions
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+---
+# Source: kubernetes-ingress/templates/controller-crdjob-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: my-haproxy-kubernetes-ingress-crdjob
+  labels:
+    app.kubernetes.io/name: my-haproxy-kubernetes-ingress-proxy
+    app.kubernetes.io/instance: my-haproxy
+    helm.sh/chart: kubernetes-ingress-1.52.1
+    app.kubernetes.io/version: "3.2.12"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    helm.sh/hook: post-install,pre-upgrade
+    helm.sh/hook-weight: "-5"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: my-haproxy-kubernetes-ingress-crdjob
+subjects:
+  - kind: ServiceAccount
+    name: my-haproxy-kubernetes-ingress-crdjob
+    namespace: haproxy-ingress
+---
+# Source: kubernetes-ingress/templates/controller-crdjob.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: my-haproxy-kubernetes-ingress-crdjob
+  namespace: haproxy-ingress
+  labels:
+    app.kubernetes.io/name: my-haproxy-kubernetes-ingress-proxy
+    app.kubernetes.io/instance: my-haproxy
+    helm.sh/chart: kubernetes-ingress-1.52.1
+    app.kubernetes.io/version: "3.2.12"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    helm.sh/hook: post-install,pre-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  ttlSecondsAfterFinished: 600
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: my-haproxy-kubernetes-ingress-proxy
+        app.kubernetes.io/instance: my-haproxy
+    spec:
+      restartPolicy: Never
+      serviceAccountName: my-haproxy-kubernetes-ingress-crdjob
+      securityContext:
+        runAsNonRoot: true
+        runAsUser:  1000
+        runAsGroup: 1000
+      containers:
+        - name: crd
+          image: "docker.io/haproxytech/kubernetes-ingress:3.2.12"
+          imagePullPolicy: IfNotPresent
+          command:
+            - /haproxy-ingress-controller
+            - --job-check-crd
+          securityContext:
+            runAsNonRoot: true
+            runAsUser:  1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - NET_BIND_SERVICE
+            seccompProfile:
+              type: RuntimeDefault
+          resources:
+            requests:
+              cpu: 250m
+              memory: 400Mi
