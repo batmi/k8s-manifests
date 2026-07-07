@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd-server-ingress
+  namespace: argocd
+spec:
+  ingressClassName: haproxy  # 사용 중이신 HAProxy 인그레스 클래스 이름 입력
+  rules:
+  - host: argocd.batmi.org  # 맥북에서 접속할 도메인 주소 (원하는 이름으로 변경 가능)
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: argocd-server
+            port:
+              name: http     # 1단계에서 insecure를 켰으므로 80번(http) 포트로 찌릅니다.
