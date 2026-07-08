@@ -6,8 +6,6 @@ metadata:
   - tigera.io/operator-cleanup
   generation: 3
   name: default
-  resourceVersion: "15737"
-  uid: c819ba00-b055-455c-bea3-9ab607b8bd35
 spec:
   calicoNetwork:
     bgp: Enabled
