@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app-deployment
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      # 🌟 바로 이 자리에 방금 만든 쿠버네티스 Secret 이름을 적어줍니다.
+      imagePullSecrets:
+      - name: github-registry-secret
+      
+      containers:
+      - name: my-app
+        # 🐳 방금 깃허브에 슛~ 하고 올린 그 이미지 주소를 정확히 적어줍니다.
+        image: ghcr.io/batmi/my-app:v1.0
+        ports:
+        - containerPort: 8080
