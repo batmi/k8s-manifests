@@ -4,7 +4,6 @@ metadata:
   creationTimestamp: "2026-07-06T11:38:10Z"
   finalizers:
   - tigera.io/operator-cleanup
-  generation: 3
   name: default
 spec:
   calicoNetwork:
