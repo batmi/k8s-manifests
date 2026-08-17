@@ -1,0 +1,27 @@
+# Environments
+.env
+.venv/
+venv/
+.DS_Store
+.coverage
+.coveragerc
+.vscode
+.agents
+coverage.json
+pyrightconfig.json
+
+# Data, Logs & Caches
+json/
+db/
+logs/
+chart/
+data/
+htmlcov/
+
+# Python
+__pycache__/
+./modules/__pycache__/
+*.pyc
+*.py[cod]
+*$py.class
+.pytest_cache/
