@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: registry-ingress
+  namespace: registry
+  annotations:
+    haproxy.org/server-snippet: |
+      http-request set-header X-Forwarded-Proto https
+spec:
+  ingressClassName: haproxy
+  rules:
+  - host: registry.batmi.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: my-registry-docker-registry
+            port:
+              number: 5000

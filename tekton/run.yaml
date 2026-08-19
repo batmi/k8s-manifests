@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: local-source-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: local-path
+---
+apiVersion: tekton.dev/v1
+kind: TaskRun
+metadata:
+  name: kaniko-local-run-1
+spec:
+  taskRef:
+    name: kaniko-local-build
+  params:
+    - name: IMAGE_NAME
+      value: registry.batmi.org/test-app:latest
+  workspaces:
+    - name: source-dir
+      persistentVolumeClaim:
+        claimName: local-source-pvc

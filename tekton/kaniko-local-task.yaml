@@ -1,0 +1,28 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: kaniko-local-build
+spec:
+  workspaces:
+    - name: source-dir
+  params:
+    - name: IMAGE_NAME
+      description: 저장할 이미지 이름
+  steps:
+    - name: build-and-push
+      image: gcr.io/kaniko-project/executor:latest
+      command:
+        - /kaniko/executor
+        - --context=$(workspaces.source-dir.path)
+        - --destination=$(params.IMAGE_NAME)
+        - --insecure
+      volumeMounts:
+        - name: docker-config
+          mountPath: /kaniko/.docker
+  volumes:
+    - name: docker-config
+      secret:
+        secretName: registry-secret
+        items:
+          - key: .dockerconfigjson
+            path: config.json

@@ -1,0 +1,18 @@
+persistence:
+  accessMode: 'ReadWriteOnce'
+  enabled: true
+  size: 20Gi
+  storageClass: 'local-path'
+
+# 마스터 노드에 강제로 고정하는 설정 (라벨 기반)
+nodeSelector:
+  registry-node: "true"
+
+# 마스터 노드의 보호벽(Taint)을 무시하고 파드를 띄우도록 허용
+tolerations:
+  - key: "node-role.kubernetes.io/control-plane"
+    operator: "Exists"
+    effect: "NoSchedule"
+  - key: "node-role.kubernetes.io/master"
+    operator: "Exists"
+    effect: "NoSchedule"

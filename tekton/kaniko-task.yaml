@@ -1,0 +1,25 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: kaniko-build
+spec:
+  params:
+    - name: IMAGE_NAME
+      description: 저장할 이미지 이름 (예: registry.batmi.org/my-app:latest)
+  steps:
+    - name: build-and-push
+      image: gcr.io/kaniko-project/executor:latest
+      command:
+        - /kaniko/executor
+        - --context=dir:///workspace/source
+        - --destination=$(params.IMAGE_NAME)
+      volumeMounts:
+        - name: docker-config
+          mountPath: /kaniko/.docker
+  volumes:
+    - name: docker-config
+      secret:
+        secretName: registry-secret
+        items:
+          - key: .dockerconfigjson
+            path: config.json
